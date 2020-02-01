@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+#define abs(x) x<0 ? -x : x
+#define epsilon 0.001
+
 using namespace std;
 
 vector<string> strtok(string str, char delim = ' '){
@@ -18,14 +21,6 @@ vector<string> strtok(string str, char delim = ' '){
 	return ret;
 }
 
-
-double timeSub(double s,double t){
-	double ret = s-t;
-	if(ret-int(ret/100)*100 > 60) ret-=40;
-	if(ret-int(ret/10000)*10000 > 6000) ret-=4000;
-	return ret;
-}
-
 int solution(vector<string> lines) {
     int answer = 0;
     
@@ -36,50 +31,35 @@ int solution(vector<string> lines) {
 
     	//s,t 문자열 처리
     	vector<string> tstr = strtok(temp[1],':');
-    	double s = stod(tstr[0])*10000+stod(tstr[1])*100+stod(tstr[2]);
+    	double s = stod(tstr[0])*3600+stod(tstr[1])*60+stod(tstr[2]);
     	double t = stod(strtok(temp[2],'s')[0]);
     
-    	t_list.push_back({timeSub(s,t-0.001),s});
+    	t_list.push_back({s-t+0.001,s});
     }
 
+    //요청들의 완료 시간들을 기준으로 1초안에 포함되는 요청들의 수를 구함
     for(int i=0;i<t_list.size();i++){
     	double begin = t_list[i][1];
     	double end = begin+0.999;
 
     	int temp=0;
     	for(int j=i;j<t_list.size();j++){
-    		if(t_list[j][1]>=begin && t_list[j][0]<=end) temp++;
+    		if(abs(t_list[j][1]-begin)>=epsilon && abs(t_list[j][0]-end)<=epsilon) temp++;
+    		
     	}
 
+    	//최대값 저장
     	if(answer<temp) answer=temp;
     }
 
     return answer;
 }
 
-/*
-double timeAdd(double s, double t){
-	double ret = s+t;
-	if(ret-int(ret/100)*100 > 60) ret+=40;
-	if(ret-int(ret/10000)*10000 > 6000) ret+=4000;
-	return ret;
-}*/
-
 int main(void){
 	cout<<fixed;
 	cout.precision(3);
-	vector<string> test = { "2016-09-15 20:59:57.421 0.351s",
-							"2016-09-15 20:59:58.233 1.181s",
-							"2016-09-15 20:59:58.299 0.8s",
-							"2016-09-15 20:59:58.688 1.041s",
-							"2016-09-15 20:59:59.591 1.412s",
-							"2016-09-15 21:00:00.464 1.466s",
-							"2016-09-15 21:00:00.741 1.581s",
-							"2016-09-15 21:00:00.748 2.31s",
-							"2016-09-15 21:00:00.966 0.381s",
-							"2016-09-15 21:00:02.066 2.62s"};
-	//string a = strtok(test[0],'s')[0];
-	//a.append("ddd");
+	vector<string> test = { "2016-09-15 01:00:04.002 2.0s", "2016-09-15 01:00:07.000 2s"};
+
 	cout<<solution(test)<<endl;
 	return 0;
 }
